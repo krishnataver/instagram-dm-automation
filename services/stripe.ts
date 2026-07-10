@@ -147,7 +147,7 @@ export class StripeService {
     const planPart = parts[3].toLowerCase()
     const workspaceId = parts[4]
 
-    let planName = PlanType.FREE
+    let planName: PlanType = PlanType.FREE
     if (planPart.startsWith("pro")) {
       planName = PlanType.PRO
     } else if (planPart.startsWith("enterprise")) {

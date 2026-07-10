@@ -63,5 +63,5 @@ export const auth = async (...args: any[]) => {
       return null
     }
   }
-  return nextAuthResult.auth(...args)
+  return (nextAuthResult.auth as any)(...args)
 }
