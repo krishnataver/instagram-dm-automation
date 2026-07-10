@@ -839,6 +839,5 @@ export default function SettingsClient({
         </div>
       )}
       </div>
-    </div>
   )
 }
