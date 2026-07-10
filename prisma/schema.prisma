@@ -1,0 +1,236 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  AGENT
+}
+
+enum ConversationStatus {
+  OPEN
+  RESOLVED
+  SNOOZED
+}
+
+enum SenderType {
+  USER
+  INSTAGRAM_USER
+  SYSTEM
+}
+
+enum TriggerType {
+  KEYWORD
+  AI_FALLBACK
+}
+
+enum PlanType {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+model User {
+  id            String         @id @default(cuid())
+  name          String?
+  email         String         @unique
+  password      String?        // Nullable for OAuth accounts
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  
+  teamMembers   TeamMember[]
+  notifications Notification[]
+  activityLogs  ActivityLog[]
+  conversations Conversation[]
+}
+
+model Workspace {
+  id                String             @id @default(cuid())
+  name              String
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  
+  teamMembers       TeamMember[]
+  instagramAccounts InstagramAccount[]
+  automations       Automation[]
+  aiPrompts         AiPrompt[]
+  subscriptions     Subscription[]
+  invoices          Invoice[]
+  activityLogs      ActivityLog[]
+}
+
+model TeamMember {
+  id          String    @id @default(cuid())
+  workspaceId String
+  userId      String
+  role        Role      @default(AGENT)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+}
+
+model InstagramAccount {
+  id                 String         @id @default(cuid())
+  workspaceId        String
+  instagramAccountId String         @unique // Instagram Graph API user ID
+  username           String
+  displayName        String?
+  accessToken        String         // Page/User Access Token
+  pageId             String?        // Associated Facebook Page ID
+  pageAccessToken    String?
+  isActive           Boolean        @default(true)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  
+  workspace          Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  conversations      Conversation[]
+  contacts           Contact[]
+}
+
+model Contact {
+  id                 String           @id @default(cuid())
+  instagramAccountId String
+  instagramUserId    String           // Contact's Instagram Scoped User ID (IGSID)
+  username           String
+  name               String?
+  labels             Json?            // Custom tags list, e.g., ["lead", "support"]
+  notes              String?
+  lastMessageAt      DateTime         @default(now())
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  
+  instagramAccount   InstagramAccount @relation(fields: [instagramAccountId], references: [id], onDelete: Cascade)
+  conversations      Conversation[]
+
+  @@unique([instagramAccountId, instagramUserId])
+}
+
+model Conversation {
+  id                 String             @id @default(cuid())
+  instagramAccountId String
+  contactId          String
+  status             ConversationStatus @default(OPEN)
+  assignedToId       String?            // User ID of team member assigned to conversation
+  isStarred          Boolean            @default(false)
+  isArchived         Boolean            @default(false)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime       @updatedAt
+  
+  instagramAccount   InstagramAccount   @relation(fields: [instagramAccountId], references: [id], onDelete: Cascade)
+  contact            Contact            @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  assignedTo         User?              @relation(fields: [assignedToId], references: [id], onDelete: SetNull)
+  messages           Message[]
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  senderId       String       // sender IGSID or page ID
+  senderType     SenderType
+  text           String
+  attachments    Json?        // Stores media arrays, e.g. [{ type: "image", url: "..." }]
+  createdAt      DateTime     @default(now())
+  
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+}
+
+model Automation {
+  id          String           @id @default(cuid())
+  workspaceId String
+  name        String
+  isActive    Boolean          @default(true)
+  priority    Int              @default(0) // Higher executes first
+  delaySeconds Int              @default(0) // Response delay
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  
+  workspace   Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  rules       AutomationRule[]
+}
+
+model AutomationRule {
+  id           String      @id @default(cuid())
+  automationId String
+  triggerType  TriggerType @default(KEYWORD)
+  triggerValue String      // For keyword, e.g., "price"; for AI_FALLBACK, empty or "fallback"
+  replyText    String
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  
+  automation   Automation  @relation(fields: [automationId], references: [id], onDelete: Cascade)
+}
+
+model AiPrompt {
+  id          String    @id @default(cuid())
+  workspaceId String
+  name        String    @default("Default Assistant")
+  promptText  String    // System guidelines for the bot
+  tone        String    @default("helpful") // e.g. professional, friendly, casual
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+model Subscription {
+  id                   String    @id @default(cuid())
+  workspaceId          String
+  stripeSubscriptionId String    @unique
+  stripeCustomerId     String
+  plan                 PlanType  @default(FREE)
+  status               String    // active, trialing, past_due, canceled
+  currentPeriodEnd     DateTime
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  
+  workspace            Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+model Invoice {
+  id              String    @id @default(cuid())
+  workspaceId     String
+  stripeInvoiceId String    @unique
+  amount          Int       // In cents
+  currency        String
+  status          String
+  pdfUrl          String?
+  createdAt       DateTime  @default(now())
+  
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ActivityLog {
+  id          String    @id @default(cuid())
+  workspaceId String
+  userId      String?
+  action      String    // e.g. "automation_created", "message_sent"
+  details     String?
+  createdAt   DateTime  @default(now())
+  
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
