@@ -47,7 +47,7 @@ export async function subscribeToPlan(plan: PlanType, billingCycle: "monthly" | 
     } catch {
       // Fallback for offline/test script execution where Next request store is unavailable
     }
-    const returnUrl = `${origin}/dashboard/settings`
+    const returnUrl = `${origin}/settings`
 
     const sessionResult = await StripeService.createCheckoutSession(workspaceId, plan, returnUrl, billingCycle)
 
@@ -122,7 +122,7 @@ export async function redirectToPortal() {
     const { workspaceId } = await getSessionWorkspace()
     const headersList = await headers()
     const origin = headersList.get("origin") || "http://localhost:3000"
-    const returnUrl = `${origin}/dashboard/settings`
+    const returnUrl = `${origin}/settings`
 
     const portalResult = await StripeService.createPortalSession(workspaceId, returnUrl)
     return { success: true, url: portalResult.url }
