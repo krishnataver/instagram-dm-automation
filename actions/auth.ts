@@ -68,23 +68,23 @@ export async function registerUser(formData: z.infer<typeof registerSchema>) {
           promptText: `You are an AI assistant for ${name}'s business. You are friendly, professional, and here to help customers.
 Here is our standard FAQ:
 - What is our product? We provide an automated Instagram inbox tool.
-- What is our pricing? We have a Free tier, and a Pro tier for $29/mo.
+- What is our pricing? We have a 7-day Free trial, then Pro at ₹150/month.
 - How to contact support? You can ask to talk to a human agent, and we will notify our staff.`,
           tone: "helpful",
           isActive: true,
         },
       })
 
-      // 5. Create Free Tier Subscription
+      // 5. Create 7-Day Free Trial Subscription
       const currentPeriodEnd = new Date()
-      currentPeriodEnd.setDate(currentPeriodEnd.getDate() + 365) // 1 year free period
+      currentPeriodEnd.setDate(currentPeriodEnd.getDate() + 7) // 7-day free trial
       await tx.subscription.create({
         data: {
           workspaceId: workspace.id,
           stripeSubscriptionId: `sub_free_${workspace.id}`,
           stripeCustomerId: `cust_free_${workspace.id}`,
           plan: PlanType.FREE,
-          status: "active",
+          status: "trialing",
           currentPeriodEnd,
         },
       })
@@ -95,7 +95,16 @@ Here is our standard FAQ:
     return { success: true, userId: result.id }
   } catch (error: any) {
     console.error("Registration Server Error:", error)
-    return { error: "Something went wrong during registration" }
+    // Return actual error in dev, generic in prod
+    const isDev = process.env.NODE_ENV === "development"
+    const msg = isDev
+      ? (error?.message || "Unknown error")
+      : (error?.code === "P1001" || error?.code === "P1002"
+          ? "Database connection failed. Please try again in a moment."
+          : error?.code === "P2002"
+          ? "This email is already registered."
+          : "Something went wrong. Please try again.")
+    return { error: msg }
   }
 }
 
