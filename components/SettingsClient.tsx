@@ -593,7 +593,7 @@ export default function SettingsClient({
                 <div>
                   <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block">Pro Tier</span>
                   <div className="mt-4 flex items-baseline text-white">
-                    <span className="text-3xl font-extrabold">{billingCycle === "monthly" ? "$4" : "$40"}</span>
+                    <span className="text-3xl font-extrabold">{billingCycle === "monthly" ? "$29" : "$290"}</span>
                     <span className="text-xs text-zinc-500 ml-1">{billingCycle === "monthly" ? "/ month" : "/ year"}</span>
                   </div>
                   <p className="text-[10px] text-pink-400 font-semibold mt-1.5 flex items-center gap-1">
@@ -601,9 +601,11 @@ export default function SettingsClient({
                   </p>
 
                   <ul className="mt-6 space-y-2 text-[11px] text-zinc-400">
-                    <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-pink-500 shrink-0" /> Unlimited Automations</li>
-                    <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-pink-500 shrink-0" /> Unlimited AI DMs</li>
-                    <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-pink-500 shrink-0" /> Add Team Members</li>
+                    <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-pink-500 shrink-0" /> Unlimited DMs & Automations</li>
+                    <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-pink-500 shrink-0" /> Comment-to-DM & Story Reply</li>
+                    <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-pink-500 shrink-0" /> Smart Match (typo-proof)</li>
+                    <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-pink-500 shrink-0" /> Conversational Flows</li>
+                    <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-pink-500 shrink-0" /> 3 Instagram Accounts</li>
                   </ul>
                 </div>
 
@@ -637,9 +639,11 @@ export default function SettingsClient({
                   </p>
 
                   <ul className="mt-6 space-y-2 text-[11px] text-zinc-400">
-                    <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-pink-500 shrink-0" /> Unlimited Everything</li>
+                    <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-pink-500 shrink-0" /> Everything in Pro</li>
+                    <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-pink-500 shrink-0" /> Unlimited Instagram Accounts</li>
+                    <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-pink-500 shrink-0" /> Team Members & Roles</li>
                     <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-pink-500 shrink-0" /> Priority Support</li>
-                    <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-pink-500 shrink-0" /> Dedicated Account Manager</li>
+                    <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-pink-500 shrink-0" /> Agency Dashboard</li>
                   </ul>
                 </div>
 

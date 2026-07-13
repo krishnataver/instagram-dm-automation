@@ -12,7 +12,8 @@ import {
   Settings, 
   LogOut, 
   ShieldCheck, 
-  User as UserIcon 
+  User as UserIcon,
+  GitBranch
 } from "lucide-react"
 import SignOutButton from "@/components/SignOutButton"
 import SandboxSimulator from "@/components/SandboxSimulator"
@@ -48,6 +49,7 @@ export default async function DashboardLayout({
     { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
     { name: "Live Inbox", href: "/inbox", icon: Inbox },
     { name: "Automations", href: "/automations", icon: Zap },
+    { name: "Flows", href: "/flows", icon: GitBranch },
     { name: "Analytics", href: "/analytics", icon: BarChart3 },
     { name: "Workspace Settings", href: "/settings", icon: Settings },
   ]
