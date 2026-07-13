@@ -12,7 +12,12 @@ interface InstagramAccount {
 }
 
 export default function SandboxSimulator() {
+  // Hidden in production — only shown when sandbox mode is ON
+  if (process.env.NEXT_PUBLIC_SANDBOX_MODE !== "true") return null
+
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const queryClient = useQueryClient()
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const [isOpen, setIsOpen] = useState(false)
   
   // Form states

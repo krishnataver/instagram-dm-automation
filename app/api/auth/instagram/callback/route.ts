@@ -7,7 +7,9 @@ export async function GET(request: NextRequest) {
   const error = searchParams.get("error")
   const stateParam = searchParams.get("state")
 
-  const appUrl = process.env.NEXTAUTH_URL || `https://${request.headers.get("host")}`
+  const host = request.headers.get("host") || "localhost:3000"
+  const proto = host.includes("localhost") ? "http" : "https"
+  const appUrl = process.env.NEXTAUTH_URL || `${proto}://${host}`
 
   // User denied permission
   if (error || !code) {
@@ -101,7 +103,7 @@ export async function GET(request: NextRequest) {
       // Step 7: Subscribe page to Instagram webhooks
       try {
         await fetch(
-          `https://graph.facebook.com/v19.0/${pageId}/subscribed_apps?subscribed_fields=messages,messaging_postbacks&access_token=${pageAccessToken}`,
+          `https://graph.facebook.com/v19.0/${pageId}/subscribed_apps?subscribed_fields=messages,messaging_postbacks,comments,feed&access_token=${pageAccessToken}`,
           { method: "POST" }
         )
       } catch (webhookErr) {
