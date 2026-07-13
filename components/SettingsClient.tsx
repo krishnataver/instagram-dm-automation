@@ -1,6 +1,7 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { updateAiPrompt } from "@/actions/ai"
 import { subscribeToPlan, redirectToPortal, processMockUpiPayment } from "@/actions/billing"
@@ -62,6 +63,32 @@ export default function SettingsClient({
 }: SettingsClientProps) {
   const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = useState<"integration" | "ai" | "billing" | "team">("integration")
+
+  const searchParams = useSearchParams()
+
+  // Instagram OAuth result banner
+  const [oauthBanner, setOauthBanner] = useState<{ type: "success" | "error"; message: string } | null>(null)
+
+  useEffect(() => {
+    const success = searchParams.get("success")
+    const error = searchParams.get("error")
+    if (success === "instagram_connected") {
+      setOauthBanner({ type: "success", message: "Instagram account connected successfully! " })
+      setTimeout(() => setOauthBanner(null), 6000)
+    } else if (error) {
+      const errorMessages: Record<string, string> = {
+        instagram_denied: "Instagram connection was cancelled.",
+        token_failed: "Failed to get Instagram access token. Please try again.",
+        no_pages: "No Facebook Pages found. Please create a Facebook Page linked to your Instagram.",
+        no_instagram_business: "No Instagram Business account found linked to your Facebook Page.",
+        server_error: "A server error occurred. Please try again.",
+        no_workspace: "Workspace not found. Please login again.",
+        invalid_state: "Invalid session. Please try connecting again.",
+      }
+      setOauthBanner({ type: "error", message: errorMessages[error] || "Instagram connection failed." })
+      setTimeout(() => setOauthBanner(null), 8000)
+    }
+  }, [searchParams])
 
   // Instagram Connection simulator state
   const [isConnectingIg, setIsConnectingIg] = useState(false)
@@ -236,6 +263,23 @@ export default function SettingsClient({
         </p>
       </div>
 
+      {/* OAuth Result Banner */}
+      {oauthBanner && (
+        <div className={`p-4 rounded-2xl border flex items-start gap-3 text-sm ${
+          oauthBanner.type === "success"
+            ? "bg-green-500/10 border-green-500/20 text-green-400"
+            : "bg-red-500/10 border-red-500/20 text-red-400"
+        }`}>
+          {oauthBanner.type === "success" ? (
+            <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" />
+          ) : (
+            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+          )}
+          <span>{oauthBanner.message}</span>
+          <button onClick={() => setOauthBanner(null)} className="ml-auto"><X className="w-4 h-4" /></button>
+        </div>
+      )}
+
       {/* Tabs Row */}
       <div className="flex items-center gap-2 border-b border-white/5 pb-px overflow-x-auto">
         <button
@@ -346,12 +390,13 @@ export default function SettingsClient({
                   )}
                 </button>
 
-                <button
-                  disabled
-                  className="px-4 py-2.5 bg-zinc-900 border border-zinc-800 text-zinc-600 text-xs font-semibold rounded-xl cursor-not-allowed"
+                <a
+                  href="/api/auth/instagram"
+                  className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-blue-500/10"
                 >
-                  Connect Official Facebook Login (Prod)
-                </button>
+                  <Instagram className="w-4 h-4" />
+                  Connect Real Instagram Account
+                </a>
               </div>
             </div>
 
