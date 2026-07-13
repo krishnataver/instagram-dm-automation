@@ -556,21 +556,27 @@ export default function SettingsClient({
             {/* Pricing Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               
-              {/* Free Card */}
+              {/* Free Trial Card */}
               <div className={`glass-panel rounded-3xl p-6 bg-[#121217]/20 border-white/5 flex flex-col justify-between relative ${
-                activePlan === PlanType.FREE ? "border-pink-500/40 bg-pink-500/[0.02]" : ""
+                activePlan === PlanType.FREE ? "border-yellow-500/40 bg-yellow-500/[0.02]" : ""
               }`}>
+                <div className="absolute right-4 top-4 px-2 py-0.5 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-[8px] font-bold uppercase tracking-wider">
+                  Trial
+                </div>
                 <div>
-                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block">Free Tier</span>
+                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block">Free Trial</span>
                   <div className="mt-4 flex items-baseline text-white">
                     <span className="text-3xl font-extrabold">₹0</span>
-                    <span className="text-xs text-zinc-500 ml-1">/ forever</span>
+                    <span className="text-xs text-zinc-500 ml-1">/ 7 days only</span>
                   </div>
+                  <p className="text-[10px] text-yellow-400 font-semibold mt-1.5 flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5" /> Trial ends after 7 days — upgrade to continue
+                  </p>
                   
                   <ul className="mt-6 space-y-2 text-[11px] text-zinc-400">
-                    <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-pink-500 shrink-0" /> 1 Instagram Connection</li>
-                    <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-pink-500 shrink-0" /> 50 Auto-Replies/month</li>
-                    <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-pink-500 shrink-0" /> Basic keyword triggers</li>
+                    <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-yellow-500 shrink-0" /> 1 Instagram Connection</li>
+                    <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-yellow-500 shrink-0" /> All Pro features unlocked</li>
+                    <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-yellow-500 shrink-0" /> No credit card required</li>
                   </ul>
                 </div>
                 
@@ -578,7 +584,7 @@ export default function SettingsClient({
                   disabled
                   className="mt-8 w-full py-2.5 rounded-xl border border-zinc-800 bg-zinc-950 text-zinc-600 text-xs font-bold cursor-not-allowed text-center"
                 >
-                  {activePlan === PlanType.FREE ? "Current Plan" : "Downgrade"}
+                  {activePlan === PlanType.FREE ? "Trial Active" : "Trial Ended"}
                 </button>
               </div>
 
