@@ -50,7 +50,7 @@ export async function createAutomation(data: { name: string; delaySeconds: numbe
       }
     })
 
-    revalidatePath("/automations")
+    try { revalidatePath("/automations") } catch {}
     return { success: true, automation }
   } catch (error) {
     return { error: "Failed to create automation" }
@@ -81,7 +81,7 @@ export async function updateAutomation(
       data: updates
     })
 
-    revalidatePath("/automations")
+    try { revalidatePath("/automations") } catch {}
     return { success: true, automation: updated }
   } catch (error) {
     return { error: "Failed to update automation" }
@@ -107,7 +107,7 @@ export async function deleteAutomation(id: string) {
       where: { id }
     })
 
-    revalidatePath("/automations")
+    try { revalidatePath("/automations") } catch {}
     return { success: true }
   } catch (error) {
     return { error: "Failed to delete automation" }
@@ -122,6 +122,11 @@ export async function addAutomationRule(data: {
   triggerType: TriggerType
   triggerValue: string
   replyText: string
+  commentReply?: string
+  smartMatch?: boolean
+  postTriggerScope?: "ALL_POSTS" | "SPECIFIC_POST" | "NEXT_POST"
+  postUrl?: string
+  requireFollow?: boolean
 }) {
   try {
     const { workspaceId } = await getSessionWorkspace()
@@ -141,15 +146,22 @@ export async function addAutomationRule(data: {
         triggerType: data.triggerType,
         triggerValue: data.triggerValue,
         replyText: data.replyText,
+        commentReply: data.commentReply || null,
+        smartMatch: data.smartMatch ?? false,
+        postTriggerScope: (data.postTriggerScope as any) ?? "ALL_POSTS",
+        postUrl: data.postUrl || null,
+        requireFollow: data.requireFollow ?? false,
       }
     })
 
-    revalidatePath("/automations")
+    try { revalidatePath("/automations") } catch {}
     return { success: true, rule }
   } catch (error) {
+    console.error("addAutomationRule error:", error)
     return { error: "Failed to add automation rule" }
   }
 }
+
 
 /**
  * Edit rule triggers and answers
@@ -175,7 +187,7 @@ export async function updateAutomationRule(
       data: updates
     })
 
-    revalidatePath("/automations")
+    try { revalidatePath("/automations") } catch {}
     return { success: true, rule: updated }
   } catch (error) {
     return { error: "Failed to update rule" }
@@ -202,7 +214,7 @@ export async function deleteAutomationRule(ruleId: string) {
       where: { id: ruleId }
     })
 
-    revalidatePath("/automations")
+    try { revalidatePath("/automations") } catch {}
     return { success: true }
   } catch (error) {
     return { error: "Failed to delete rule" }

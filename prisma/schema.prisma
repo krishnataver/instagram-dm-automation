@@ -26,8 +26,18 @@ enum SenderType {
 }
 
 enum TriggerType {
-  KEYWORD
-  AI_FALLBACK
+  KEYWORD         // DM keyword match
+  AI_FALLBACK     // AI reply when no keyword matches
+  COMMENT         // Comment on post/reel triggers DM
+  ALL_COMMENTS    // Any comment on post triggers DM
+  STORY_REPLY     // Story reply triggers DM
+  FOLLOW_GATE     // Only reply if user follows account
+}
+
+enum PostTriggerScope {
+  SPECIFIC_POST   // Only one specific post
+  ALL_POSTS       // All posts and reels
+  NEXT_POST       // Only next published post
 }
 
 enum PlanType {
@@ -40,7 +50,7 @@ model User {
   id            String         @id @default(cuid())
   name          String?
   email         String         @unique
-  password      String?        // Nullable for OAuth accounts
+  password      String?
   emailVerified DateTime?
   image         String?
   createdAt     DateTime       @default(now())
@@ -65,6 +75,7 @@ model Workspace {
   subscriptions     Subscription[]
   invoices          Invoice[]
   activityLogs      ActivityLog[]
+  conversationFlows ConversationFlow[]
 }
 
 model TeamMember {
@@ -84,11 +95,11 @@ model TeamMember {
 model InstagramAccount {
   id                 String         @id @default(cuid())
   workspaceId        String
-  instagramAccountId String         @unique // Instagram Graph API user ID
+  instagramAccountId String         @unique
   username           String
   displayName        String?
-  accessToken        String         // Page/User Access Token
-  pageId             String?        // Associated Facebook Page ID
+  accessToken        String
+  pageId             String?
   pageAccessToken    String?
   isActive           Boolean        @default(true)
   createdAt          DateTime       @default(now())
@@ -102,10 +113,10 @@ model InstagramAccount {
 model Contact {
   id                 String           @id @default(cuid())
   instagramAccountId String
-  instagramUserId    String           // Contact's Instagram Scoped User ID (IGSID)
+  instagramUserId    String
   username           String
   name               String?
-  labels             Json?            // Custom tags list, e.g., ["lead", "support"]
+  labels             Json?
   notes              String?
   lastMessageAt      DateTime         @default(now())
   createdAt          DateTime         @default(now())
@@ -122,11 +133,11 @@ model Conversation {
   instagramAccountId String
   contactId          String
   status             ConversationStatus @default(OPEN)
-  assignedToId       String?            // User ID of team member assigned to conversation
+  assignedToId       String?
   isStarred          Boolean            @default(false)
   isArchived         Boolean            @default(false)
   createdAt          DateTime           @default(now())
-  updatedAt          DateTime       @updatedAt
+  updatedAt          DateTime           @updatedAt
   
   instagramAccount   InstagramAccount   @relation(fields: [instagramAccountId], references: [id], onDelete: Cascade)
   contact            Contact            @relation(fields: [contactId], references: [id], onDelete: Cascade)
@@ -137,47 +148,81 @@ model Conversation {
 model Message {
   id             String       @id @default(cuid())
   conversationId String
-  senderId       String       // sender IGSID or page ID
+  senderId       String
   senderType     SenderType
   text           String
-  attachments    Json?        // Stores media arrays, e.g. [{ type: "image", url: "..." }]
+  attachments    Json?
   createdAt      DateTime     @default(now())
   
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 }
 
 model Automation {
+  id           String           @id @default(cuid())
+  workspaceId  String
+  name         String
+  isActive     Boolean          @default(true)
+  priority     Int              @default(0)
+  delaySeconds Int              @default(0)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  
+  workspace    Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  rules        AutomationRule[]
+}
+
+model AutomationRule {
+  id               String            @id @default(cuid())
+  automationId     String
+  triggerType      TriggerType       @default(KEYWORD)
+  triggerValue     String            // keyword text or empty for ALL_COMMENTS
+  replyText        String            // DM reply message
+  commentReply     String?           // Optional public comment reply
+  smartMatch       Boolean           @default(false) // Fuzzy keyword matching
+  postTriggerScope PostTriggerScope  @default(ALL_POSTS)
+  postId           String?           // Specific Instagram post/reel ID
+  postUrl          String?           // Post URL for display
+  requireFollow    Boolean           @default(false) // Follow-gate toggle
+  flowId           String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  
+  automation       Automation        @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  flow             ConversationFlow? @relation(fields: [flowId], references: [id], onDelete: SetNull)
+}
+
+model ConversationFlow {
   id          String           @id @default(cuid())
   workspaceId String
   name        String
   isActive    Boolean          @default(true)
-  priority    Int              @default(0) // Higher executes first
-  delaySeconds Int              @default(0) // Response delay
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
   
   workspace   Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  steps       FlowStep[]
   rules       AutomationRule[]
 }
 
-model AutomationRule {
-  id           String      @id @default(cuid())
-  automationId String
-  triggerType  TriggerType @default(KEYWORD)
-  triggerValue String      // For keyword, e.g., "price"; for AI_FALLBACK, empty or "fallback"
-  replyText    String
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+model FlowStep {
+  id           String           @id @default(cuid())
+  flowId       String
+  stepOrder    Int
+  message      String
+  waitForReply Boolean          @default(false)
+  matchValue   String?
+  nextStepId   String?
+  createdAt    DateTime         @default(now())
   
-  automation   Automation  @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  flow         ConversationFlow @relation(fields: [flowId], references: [id], onDelete: Cascade)
 }
 
 model AiPrompt {
   id          String    @id @default(cuid())
   workspaceId String
   name        String    @default("Default Assistant")
-  promptText  String    // System guidelines for the bot
-  tone        String    @default("helpful") // e.g. professional, friendly, casual
+  promptText  String
+  tone        String    @default("helpful")
   isActive    Boolean   @default(true)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -191,7 +236,7 @@ model Subscription {
   stripeSubscriptionId String    @unique
   stripeCustomerId     String
   plan                 PlanType  @default(FREE)
-  status               String    // active, trialing, past_due, canceled
+  status               String
   currentPeriodEnd     DateTime
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
@@ -203,7 +248,7 @@ model Invoice {
   id              String    @id @default(cuid())
   workspaceId     String
   stripeInvoiceId String    @unique
-  amount          Int       // In cents
+  amount          Int
   currency        String
   status          String
   pdfUrl          String?
@@ -227,7 +272,7 @@ model ActivityLog {
   id          String    @id @default(cuid())
   workspaceId String
   userId      String?
-  action      String    // e.g. "automation_created", "message_sent"
+  action      String
   details     String?
   createdAt   DateTime  @default(now())
   
