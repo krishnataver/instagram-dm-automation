@@ -168,15 +168,21 @@ export default function SettingsClient({
     setIsConnectingIg(true)
     try {
       // Server action call to connect mock account
-      await connectInstagramAccount(workspaceId, "mock_token", "mock_fb_page_id")
+      const result = await connectInstagramAccount(workspaceId, "mock_token", "mock_fb_page_id")
+      if (result.error) {
+        console.error("Instagram connect error:", result.error)
+        alert("Failed to connect: " + result.error)
+        return
+      }
       setIgConnectSuccess(true)
       queryClient.invalidateQueries({ queryKey: ["connectedAccounts"] })
       setTimeout(() => {
         setIgConnectSuccess(false)
-        window.location.reload() // Reload page to fetch from server component
+        window.location.reload() // Reload page to fetch fresh data from server component
       }, 1500)
     } catch (err) {
       console.error(err)
+      alert("An unexpected error occurred while connecting Instagram.")
     } finally {
       setIsConnectingIg(false)
     }
