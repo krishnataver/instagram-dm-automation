@@ -12,6 +12,7 @@ export const authConfig = {
                             nextUrl.pathname.startsWith("/inbox") ||
                             nextUrl.pathname.startsWith("/automations") ||
                             nextUrl.pathname.startsWith("/analytics") ||
+                            nextUrl.pathname.startsWith("/flows") ||
                             nextUrl.pathname.startsWith("/settings")
 
       if (isOnDashboard) {
