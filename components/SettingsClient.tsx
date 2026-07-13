@@ -548,7 +548,7 @@ export default function SettingsClient({
                       : "text-zinc-400 hover:text-white"
                   }`}
                 >
-                  Yearly (Save 17%)
+                  Yearly <span className="text-pink-400">(Save 44%)</span>
                 </button>
               </div>
             </div>
@@ -563,14 +563,14 @@ export default function SettingsClient({
                 <div>
                   <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block">Free Tier</span>
                   <div className="mt-4 flex items-baseline text-white">
-                    <span className="text-3xl font-extrabold">$0</span>
+                    <span className="text-3xl font-extrabold">₹0</span>
                     <span className="text-xs text-zinc-500 ml-1">/ forever</span>
                   </div>
                   
                   <ul className="mt-6 space-y-2 text-[11px] text-zinc-400">
                     <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-pink-500 shrink-0" /> 1 Instagram Connection</li>
-                    <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-pink-500 shrink-0" /> 100 AI Replies/mo</li>
-                    <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-pink-500 shrink-0" /> Standard dashboard logs</li>
+                    <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-pink-500 shrink-0" /> 50 Auto-Replies/month</li>
+                    <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-pink-500 shrink-0" /> Basic keyword triggers</li>
                   </ul>
                 </div>
                 
@@ -593,11 +593,11 @@ export default function SettingsClient({
                 <div>
                   <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block">Pro Tier</span>
                   <div className="mt-4 flex items-baseline text-white">
-                    <span className="text-3xl font-extrabold">{billingCycle === "monthly" ? "$29" : "$290"}</span>
+                    <span className="text-3xl font-extrabold">{billingCycle === "monthly" ? "₹150" : "₹999"}</span>
                     <span className="text-xs text-zinc-500 ml-1">{billingCycle === "monthly" ? "/ month" : "/ year"}</span>
                   </div>
                   <p className="text-[10px] text-pink-400 font-semibold mt-1.5 flex items-center gap-1">
-                    <Sparkles className="w-3.5 h-3.5" /> 3-day free trial included
+                    <Sparkles className="w-3.5 h-3.5" /> 7 days FREE trial — no credit card needed
                   </p>
 
                   <ul className="mt-6 space-y-2 text-[11px] text-zinc-400">
@@ -631,11 +631,11 @@ export default function SettingsClient({
                 <div>
                   <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block">Enterprise</span>
                   <div className="mt-4 flex items-baseline text-white">
-                    <span className="text-3xl font-extrabold">{billingCycle === "monthly" ? "$149" : "$1490"}</span>
+                    <span className="text-3xl font-extrabold">{billingCycle === "monthly" ? "₹499" : "₹3,999"}</span>
                     <span className="text-xs text-zinc-500 ml-1">{billingCycle === "monthly" ? "/ month" : "/ year"}</span>
                   </div>
                   <p className="text-[10px] text-pink-400 font-semibold mt-1.5 flex items-center gap-1">
-                    <Sparkles className="w-3.5 h-3.5" /> 3-day free trial included
+                    <Sparkles className="w-3.5 h-3.5" /> 7 days FREE trial — no credit card needed
                   </p>
 
                   <ul className="mt-6 space-y-2 text-[11px] text-zinc-400">
